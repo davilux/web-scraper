@@ -11,10 +11,10 @@ const scrape = async () => {
 
 
   ////Take a screenshot:
-  // await page.screenshot({path:'screenshot.png', fullPage:true})
+  // await page.screenshot({path:'bookSandbox.png', fullPage:true})
 
   ////Create a pdf:
-  // await page.pdf({path:'example.pdf', format:'A4'})
+  // await page.pdf({path:'bookSandbox.pdf', format:'A4'})
 
   ////Get the title of the page:
   // const html = await page.content()
@@ -40,16 +40,30 @@ const scrape = async () => {
   // console.log(titles)
 
 
-      //Get all the book data:
-      const books = await page.evaluate(() => {
-        return Array.from(document.querySelectorAll('.product_pod'), (element) => ({
-          title: element.querySelector('h3 a').title,
-          link: element.querySelector('h3 a').href,
-          price: element.querySelector('.product_price .price_color').innerText,
-          starRating: element.querySelector('.star-rating').classList['1']
-        }))
-      })
-      console.log(books)
+  // //Get all the book data:
+  // const books = await page.evaluate(() => {
+  //   return Array.from(document.querySelectorAll('.product_pod'), (element) => ({
+  //     title: element.querySelector('h3 a').title,
+  //     link: element.querySelector('h3 a').href,
+  //     price: element.querySelector('.product_price .price_color').innerText,
+  //     starRating: element.querySelector('.star-rating').classList['1']
+  //   }))
+  // })
+  // console.log(books)
+
+  //Different way to accomplish the same thing. We can use $$eval and .map instead of Array.from()
+  const books = await page.$$eval('.product_pod', (elements) => elements.map(element => ({
+    title: element.querySelector('h3 a').title,
+    link: element.querySelector('h3 a').href,
+    price: element.querySelector('.product_price .price_color').innerText,
+    starRating: element.querySelector('.star-rating').classList['1']
+  })))
+
+  //Save data to a .JSON file:
+  fs.writeFile('books.json', JSON.stringify(books), (err)=> {
+    if(err) throw err
+    console.log('file saved')
+  })
 
 
   //always close the browser when you're done.
